@@ -1,5 +1,3 @@
-# PluginTemplate
+# StreamController Docker Compose Plugin
 
-A simple plugin you can use as a starting point for your amazing creations!
-
-For more information checkout [the docs](https://streamcontroller.github.io/docs/latest/).
+This plugin allows you to manage Docker Compose projects using StreamController.
