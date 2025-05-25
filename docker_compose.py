@@ -1,10 +1,12 @@
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Optional
 
-from config import ServiceStatus
 from loguru import logger as log
+
+from config import ServiceStatus
 
 
 def _run_compose(compose_file: Path | None, *args, **kwargs):
@@ -12,7 +14,6 @@ def _run_compose(compose_file: Path | None, *args, **kwargs):
         print(f"Compose file does not exist: {compose_file}")
         return None
 
-    """Encapsulate all subprocess.run calls for docker compose."""
     base_cmd = [
         "docker",
         "compose",
@@ -20,14 +21,21 @@ def _run_compose(compose_file: Path | None, *args, **kwargs):
         str(compose_file),
     ]
     cmd = base_cmd + list(args)
+
+    # If running in Flatpak, use flatpak-spawn --host
+    if os.environ.get("FLATPAK_ID"):
+        cmd = ["flatpak-spawn", "--host"] + cmd
+        kwargs["cwd"] = str(compose_file.parent)
+
     try:
-        return subprocess.run(
+        res = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            check=True,
+            check=False,
             **kwargs,
         )
+        return res
     except Exception as e:
         print(f"Error running docker compose command: {cmd}\n{e}")
         return None
