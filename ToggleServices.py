@@ -166,13 +166,13 @@ class ToggleServices(ActionBase):
 
     def on_key_down(self) -> None:
         if self.compose_status == ServiceStatus.RUNNING:
-            self.update_status(ServiceStatus.STARTING)
+            self.update_status(ServiceStatus.STOPPING)
             time.sleep(0.5)
             if not dc.stop(self.compose_file_name, self.selected_services):
                 self.set_label("Error stopping")
                 return
         else:
-            self.update_status(ServiceStatus.STOPPING)
+            self.update_status(ServiceStatus.STARTING)
             time.sleep(0.5)
             if not dc.start(self.compose_file_name, self.selected_services):
                 self.set_label("Error starting")
