@@ -7,13 +7,17 @@ from enums import ServiceStatus
 from loguru import logger as log
 
 
-def _run_compose(compose_file: Path, *args, **kwargs):
+def _run_compose(compose_file: Path | None, *args, **kwargs):
+    if not compose_file or not compose_file.exists():
+        print(f"Compose file does not exist: {compose_file}")
+        return None
+
     """Encapsulate all subprocess.run calls for docker compose."""
     base_cmd = [
         "docker",
         "compose",
         "-f",
-        compose_file,
+        str(compose_file),
     ]
     cmd = base_cmd + list(args)
     try:
@@ -30,7 +34,7 @@ def _run_compose(compose_file: Path, *args, **kwargs):
 
 
 def get_status(
-    compose_file: Path, services: Optional[list[str]] = None
+    compose_file: Path | None, services: Optional[list[str]] = None
 ) -> ServiceStatus:
     """Returns 'running', 'stopped', or 'error' if not found or on exception.
     If multiple services: returns 'running' if all running, 'stopped' if all stopped, 'partial' if mixed, 'error' on error.
@@ -81,7 +85,7 @@ def get_status(
         return ServiceStatus.ERROR
 
 
-def get_services(compose_file: Path) -> list[str]:
+def get_services(compose_file: Path | None) -> list[str]:
     """Returns a list of services in the compose file."""
     try:
         result = _run_compose(compose_file, "config", "--services")
@@ -94,7 +98,7 @@ def get_services(compose_file: Path) -> list[str]:
         return []
 
 
-def start(compose_file: Path, services: Optional[list[str]]) -> bool:
+def start(compose_file: Path | None, services: Optional[list[str]]) -> bool:
     log.info(f"Starting {services}...")
     try:
         result = _run_compose(compose_file, "up", "-d", *services)
@@ -104,7 +108,7 @@ def start(compose_file: Path, services: Optional[list[str]]) -> bool:
         return False
 
 
-def stop(compose_file: Path, services: Optional[list[str]]) -> bool:
+def stop(compose_file: Path | None, services: Optional[list[str]]) -> bool:
     log.info(f"Stopping {services}...")
 
     try:

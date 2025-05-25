@@ -1,6 +1,9 @@
 # Import StreamController modules
-from src.backend.PluginManager.PluginBase import PluginBase
+
+from src.backend.DeckManagement.InputIdentifier import Input
 from src.backend.PluginManager.ActionHolder import ActionHolder
+from src.backend.PluginManager.ActionInputSupport import ActionInputSupport
+from src.backend.PluginManager.PluginBase import PluginBase
 
 # Import actions
 from .ToggleServices import ToggleServices
@@ -18,6 +21,9 @@ class PluginTemplate(PluginBase):
             action_base=ToggleServices,
             action_id="docker-compose::ToggleServices",
             action_name="Toggle Services",
+            action_support={
+                Input.Key: ActionInputSupport.SUPPORTED,
+            },
         )
         self.add_action_holder(self.simple_action_holder)
 

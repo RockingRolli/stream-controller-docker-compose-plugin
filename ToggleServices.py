@@ -13,7 +13,6 @@ from src.backend.PageManagement.Page import Page
 from src.backend.PluginManager.ActionBase import ActionBase
 from src.backend.PluginManager.PluginBase import PluginBase
 
-
 # Import gtk modules - used for the config rows
 import gi
 
@@ -51,19 +50,25 @@ class ToggleServices(ActionBase):
             input_ident=input_ident,
         )
 
+    def set_image(self, image_name: str):
+        asset_path = Path(self.plugin_base.PATH) / "assets" / image_name
+        self.set_media(media_path=asset_path, size=0.75)
+
     @property
     def compose_status(self) -> ServiceStatus:
         """Get the status of the compose file."""
-        if not self.backend:
-            return ServiceStatus.ERROR
-        status_str = dc.get_status(self.compose_file_name)
-        return ServiceStatus(status_str)
+        return dc.get_status(self.compose_file_name, self.selected_services)
 
     @property
-    def compose_file_name(self) -> Path:
+    def compose_file_name(self) -> Path | None:
         """Get the compose file name."""
         settings = self.get_settings()
-        path = Path(settings.get("compose_file", ""))
+
+        compose_file = settings.get("compose_file", None)
+        if not compose_file:
+            return None
+
+        path = Path(compose_file)
         return path
 
     @compose_file_name.setter
@@ -73,7 +78,10 @@ class ToggleServices(ActionBase):
         settings["compose_file"] = compose_file_name
         self.set_settings(settings)
         self.compose_file_button.set_label(os.path.basename(compose_file_name))
-        self.set_media()
+
+        self.service_selection_row.set_service_names(
+            dc.get_services(Path(compose_file_name))
+        )
 
     @property
     def selected_services(self) -> list:
@@ -94,9 +102,6 @@ class ToggleServices(ActionBase):
         if file:
             self.compose_file_name = file.get_path()
 
-    def update_services_menu(self):
-        pass
-
     def get_config_rows(self) -> list:
         def on_button_clicked(button):
             dialog = Gtk.FileDialog()
@@ -105,11 +110,13 @@ class ToggleServices(ActionBase):
                 self.compose_file_button.get_root(), None, self.on_file_selected
             )
 
-        self.compose_file_button = Gtk.Button(
-            label=os.path.basename(self.compose_file_name)
-        )
+        label = "(None)"
+        if self.compose_file_name:
+            label = os.path.basename(self.compose_file_name)
+
+        self.compose_file_button = Gtk.Button(label=label)
         self.compose_file_button.connect("clicked", on_button_clicked)
-        self.compose_file_button.set_label(self.compose_file_name.name)
+        # self.compose_file_button.set_label(self.compose_file_name.name)
         self.compose_file_row = Adw.ActionRow(title="Compose File")
         self.compose_file_row.add_suffix(self.compose_file_button)
 
@@ -123,6 +130,7 @@ class ToggleServices(ActionBase):
         def services_selection_changed(service_names: list[str]):
             """Callback to update the selected services when the selection changes."""
             self.selected_services = service_names
+            self.update_label_and_icon()
 
         self.service_selection_row = ServicesSelection(services_selection_changed)
         self.service_selection_row.set_service_names(services, self.selected_services)
@@ -133,23 +141,46 @@ class ToggleServices(ActionBase):
         ]
 
     def update_label_and_icon(self):
+        if not self.compose_file_name:
+            self.set_label("No File")
+            self.set_image("file-unknown.svg")
+            return
+
+        if not self.selected_services:
+            self.set_label("No SVCs")
+            self.set_image("file-unknown.svg")
+            return
+
+        compose_status = self.compose_status
+
+        if compose_status == ServiceStatus.STOPPED:
+            self.set_image("server-off.svg")
+        elif compose_status == ServiceStatus.RUNNING:
+            self.set_image("server.svg")
+        elif compose_status in (
+            ServiceStatus.STARTING,
+            ServiceStatus.STOPPING,
+            ServiceStatus.PARTIAL,
+        ):
+            self.set_image("server-bolt.svg")
+        elif compose_status.ERROR:
+            self.set_image("plug-x.svg")
+
         self.set_label(STATUS_TEXTS.get(self.compose_status, "N/A"))
 
     def on_ready(self) -> None:
         self.update_label_and_icon()
 
-        media_path = os.path.join(self.plugin_base.PATH, "assets", "test.png")
-        self.set_media(media_path=media_path, size=0.75)
-        self.set_background_color([200, 100, 123])  # Dark gray background
-
     def on_key_down(self) -> None:
         if self.compose_status == ServiceStatus.RUNNING:
             self.set_label("Stopping...")
+            self.set_image("server-bolt.svg")
             if not dc.stop(self.compose_file_name, self.selected_services):
                 self.set_label("Error stopping")
                 return
         else:
             self.set_label("Starting...")
+            self.set_image("server-bolt.svg")
             if not dc.start(self.compose_file_name, self.selected_services):
                 self.set_label("Error starting")
                 return

@@ -1,5 +1,5 @@
 {
-    "version": "",
+    "version": "0.0.1",
     "thumbnail": "",
     "id": "humble-retreat_docker-compose-plugin",
     "name": "Docker Compose",
@@ -12,5 +12,6 @@
         "en_US": "Manage docker compose services."
     },
     "tags": ["docker compose","docker"],
-    "minimum-app-version": "1.0.0"
+    "minimum-app-version": "1.0.0",
+    "app-version": "1.4.11-beta"
 }
