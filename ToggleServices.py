@@ -3,6 +3,8 @@ import sys
 import time
 from pathlib import Path
 
+from loguru import logger as log
+
 sys.path.append(os.path.dirname(__file__))
 
 from config import ServiceStatus, STATUS_MAP
@@ -131,7 +133,7 @@ class ToggleServices(ActionBase):
         try:
             services = dc.get_services(self.compose_file_name)
         except Exception as e:
-            print(f"Error getting services: {e}")
+            log.error(f"Error getting services: {e}")
 
         def services_selection_changed(service_names: list[str]):
             """Callback to update the selected services when the selection changes."""

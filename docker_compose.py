@@ -11,7 +11,7 @@ from config import ServiceStatus
 
 def _run_compose(compose_file: Path | None, *args, **kwargs):
     if not compose_file or not compose_file.exists():
-        print(f"Compose file does not exist: {compose_file}")
+        log.error(f"Compose file does not exist: {compose_file}")
         return None
 
     base_cmd = [
@@ -37,7 +37,7 @@ def _run_compose(compose_file: Path | None, *args, **kwargs):
         )
         return res
     except Exception as e:
-        print(f"Error running docker compose command: {cmd}\n{e}")
+        log.error(f"Error running docker compose command: {cmd}\n{e}")
         return None
 
 
@@ -92,7 +92,7 @@ def get_status(
             # Mixed state
             return ServiceStatus.PARTIAL
     except Exception as e:
-        print(f"Error checking service status: {e}")
+        log.error(f"Error checking service status: {e}")
         return ServiceStatus.ERROR
 
 
@@ -105,7 +105,7 @@ def get_services(compose_file: Path | None) -> list[str]:
         services = [line.strip() for line in result.stdout.splitlines() if line.strip()]
         return sorted(services)
     except Exception as e:
-        print(f"Error retrieving services: {e}")
+        log.error(f"Error retrieving services: {e}")
         return []
 
 
@@ -115,7 +115,7 @@ def start(compose_file: Path | None, services: Optional[list[str]]) -> bool:
         result = _run_compose(compose_file, "up", "-d", *services)
         return result is not None and result.returncode == 0
     except Exception as e:
-        print(f"Error starting services: {e}")
+        log.error(f"Error starting services: {e}")
         return False
 
 
@@ -126,5 +126,5 @@ def stop(compose_file: Path | None, services: Optional[list[str]]) -> bool:
         result = _run_compose(compose_file, "stop", *services)
         return result is not None and result.returncode == 0
     except Exception as e:
-        print(f"Error stopping services: {e}")
+        log.error(f"Error stopping services: {e}")
         return False
