@@ -51,35 +51,38 @@ def get_status(
         if not services:
             services = get_services(compose_file)
 
+        # Get status for all services in one go
+        result = _run_compose(compose_file, "ps", "-a", "--format=json")
+        if result is None:
+            return ServiceStatus.ERROR
+
+        # Map service name to status
+        service_status_map = {}
+        for line in result.stdout.strip().splitlines():
+            if not line.strip():
+                continue
+            svc = json.loads(line)
+            name = svc.get("Service")
+            state = svc.get("State", "").lower()
+            if state == "running":
+                service_status_map[name] = ServiceStatus.RUNNING
+            elif state in ("exited", "stopped", "dead"):
+                service_status_map[name] = ServiceStatus.STOPPED
+            elif state in ("starting", "created"):
+                service_status_map[name] = ServiceStatus.STARTING
+            elif state in ("removing", "paused", "restarting"):
+                service_status_map[name] = ServiceStatus.STOPPING
+            else:
+                service_status_map[name] = ServiceStatus.ERROR
+
         statuses = []
         for service_name in services:
-            result = _run_compose(
-                compose_file, "ps", "-a", "--format=json", service_name
-            )
-            if result is None:
-                statuses.append(ServiceStatus.ERROR)
-                continue
-            found = False
-            for line in result.stdout.strip().splitlines():
-                if not line.strip():
-                    continue
-                svc = json.loads(line)
-                if svc.get("Service") == service_name:
-                    found = True
-                    state = svc.get("State", "").lower()
-                    if state == "running":
-                        statuses.append(ServiceStatus.RUNNING)
-                    elif state in ("exited", "stopped", "dead"):
-                        statuses.append(ServiceStatus.STOPPED)
-                    elif state in ("starting", "created"):
-                        statuses.append(ServiceStatus.STARTING)
-                    elif state in ("removing", "paused", "restarting"):
-                        statuses.append(ServiceStatus.STOPPING)
-                    else:
-                        statuses.append(ServiceStatus.ERROR)
-            if not found:
+            status = service_status_map.get(service_name)
+            if status is None:
                 statuses.append(ServiceStatus.STOPPED)
-        # Aggregate status
+            else:
+                statuses.append(status)
+
         unique_statuses = set(statuses)
         if len(unique_statuses) == 1:
             return unique_statuses.pop()
