@@ -9,7 +9,7 @@ import subprocess
 from streamcontroller_plugin_tools import BackendBase
 from loguru import logger as log
 
-from enums import ServiceStatus
+from config import ServiceStatus
 
 
 class DockerComposeBackend(BackendBase):

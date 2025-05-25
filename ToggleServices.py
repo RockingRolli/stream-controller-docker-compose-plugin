@@ -1,10 +1,11 @@
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.append(os.path.dirname(__file__))
 
-from enums import ServiceStatus
+from config import ServiceStatus, STATUS_MAP
 from ui.ServicesSelection import ServicesSelection
 import docker_compose as dc
 from src.backend.DeckManagement.DeckController import DeckController
@@ -140,6 +141,13 @@ class ToggleServices(ActionBase):
             self.service_selection_row,
         ]
 
+    def update_status(self, status: ServiceStatus) -> None:
+        """Update the status of the action."""
+        status_config = STATUS_MAP[status]
+        self.set_label(status_config.label)
+        self.set_image(status_config.icon)
+        self.set_background_color(status_config.background_color, True)
+
     def update_label_and_icon(self):
         if not self.compose_file_name:
             self.set_label("No File")
@@ -151,36 +159,21 @@ class ToggleServices(ActionBase):
             self.set_image("file-unknown.svg")
             return
 
-        compose_status = self.compose_status
-
-        if compose_status == ServiceStatus.STOPPED:
-            self.set_image("server-off.svg")
-        elif compose_status == ServiceStatus.RUNNING:
-            self.set_image("server.svg")
-        elif compose_status in (
-            ServiceStatus.STARTING,
-            ServiceStatus.STOPPING,
-            ServiceStatus.PARTIAL,
-        ):
-            self.set_image("server-bolt.svg")
-        elif compose_status.ERROR:
-            self.set_image("plug-x.svg")
-
-        self.set_label(STATUS_TEXTS.get(self.compose_status, "N/A"))
+        self.update_status(self.compose_status)
 
     def on_ready(self) -> None:
         self.update_label_and_icon()
 
     def on_key_down(self) -> None:
         if self.compose_status == ServiceStatus.RUNNING:
-            self.set_label("Stopping...")
-            self.set_image("server-bolt.svg")
+            self.update_status(ServiceStatus.STARTING)
+            time.sleep(0.5)
             if not dc.stop(self.compose_file_name, self.selected_services):
                 self.set_label("Error stopping")
                 return
         else:
-            self.set_label("Starting...")
-            self.set_image("server-bolt.svg")
+            self.update_status(ServiceStatus.STOPPING)
+            time.sleep(0.5)
             if not dc.start(self.compose_file_name, self.selected_services):
                 self.set_label("Error starting")
                 return

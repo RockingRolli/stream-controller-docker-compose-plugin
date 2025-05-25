@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 # Import python modules
 import os
 
-from enums import ServiceStatus
+from config import ServiceStatus
 from src.backend.DeckManagement.DeckController import DeckController
 from src.backend.DeckManagement.InputIdentifier import InputIdentifier
 from src.backend.PageManagement.Page import Page

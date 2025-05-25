@@ -1,9 +1,9 @@
 {
     "generic": {
-        "copyright": "",
-        "original-url": "",
-        "license": "",
-        "license-url": "",
+        "copyright": "Roland von Ohlen (RockingRolli)",
+        "original-url": "https://github.com/RockingRolli/stream-controller-docker-compose-plugin",
+        "license": "GPL-3.0",
+        "license-url": "https://www.gnu.org/licenses/gpl-3.0.txt",
         "description": ""
     }
 }

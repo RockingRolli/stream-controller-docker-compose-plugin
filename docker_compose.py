@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-from enums import ServiceStatus
+from config import ServiceStatus
 from loguru import logger as log
 
 
