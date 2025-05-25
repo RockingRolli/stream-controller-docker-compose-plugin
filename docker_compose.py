@@ -41,7 +41,7 @@ def get_status(
     """
     try:
         if not services:
-            return ServiceStatus.ERROR
+            services = get_services(compose_file)
 
         statuses = []
         for service_name in services:

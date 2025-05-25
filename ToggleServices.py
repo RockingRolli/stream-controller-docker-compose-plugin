@@ -154,11 +154,6 @@ class ToggleServices(ActionBase):
             self.set_image("file-unknown.svg")
             return
 
-        if not self.selected_services:
-            self.set_label("No SVCs")
-            self.set_image("file-unknown.svg")
-            return
-
         self.update_status(self.compose_status)
 
     def on_ready(self) -> None:

@@ -24,7 +24,7 @@ class ServicesSelection(Adw.ActionRow):
         self.services_popover.set_child(self.services_listbox)
 
         # Set a fixed width for the MenuButton to prevent jumping
-        self.services_menu_button = Gtk.MenuButton(label="Select Services")
+        self.services_menu_button = Gtk.MenuButton(label="(All Services)")
         self.services_menu_button.set_popover(self.services_popover)
         self.services_menu_button.set_direction(Gtk.ArrowType.RIGHT)
         self.services_menu_button.set_size_request(180, -1)
@@ -38,7 +38,7 @@ class ServicesSelection(Adw.ActionRow):
             label = "\n".join(selected_services)
             self.services_menu_button.set_label(label)
         else:
-            self.services_menu_button.set_label("Select Services")
+            self.services_menu_button.set_label("(All Services)")
 
     def on_check_toggled(self, *args, **kwargs):
         selected_services = [
