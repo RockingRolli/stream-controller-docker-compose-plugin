@@ -12,18 +12,22 @@ class ServicesSelection(Adw.ActionRow):
         self.set_subtitle("Choose services to manage")
         self.set_activatable(True)
 
-        self.check_buttons = []
+        self._service_rows = []
+        self.selected_services = []
 
         self.on_selection_change = on_selection_change
 
         self.services_popover = Gtk.Popover()
+        self.services_popover.set_has_arrow(False)
         self.services_listbox = Gtk.ListBox()
         self.services_listbox.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self.services_popover.set_child(self.services_listbox)
 
+        # Set a fixed width for the MenuButton to prevent jumping
         self.services_menu_button = Gtk.MenuButton(label="Select Services")
         self.services_menu_button.set_popover(self.services_popover)
         self.services_menu_button.set_direction(Gtk.ArrowType.RIGHT)
+        self.services_menu_button.set_size_request(180, -1)
 
         self.add_suffix(self.services_menu_button)
 
@@ -36,7 +40,7 @@ class ServicesSelection(Adw.ActionRow):
         else:
             self.services_menu_button.set_label("Select Services")
 
-    def on_check_toggled(self, check, _):
+    def on_check_toggled(self, *args, **kwargs):
         selected_services = [
             c.service_name for c in self._service_rows if c.get_active()
         ]
@@ -69,7 +73,3 @@ class ServicesSelection(Adw.ActionRow):
             check.connect("toggled", self.on_check_toggled, None)
 
         self.update_services_menu_button_label()
-
-    def get_selected_services(self) -> list[str]:
-        """Returns a list of selected service names."""
-        return [btn.get_label() for btn in self.check_buttons if btn.get_active()]

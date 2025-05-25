@@ -56,6 +56,7 @@ class DockerComposeBackend(BackendBase):
             self.service_names = []
 
     def can_run(self) -> bool:
+        log.info(self)
         """Checks if the backend can run with the current compose file and service names."""
         if not self.compose_file or not os.path.isfile(self.compose_file):
             log.error("Compose file is not set or does not exist.")
