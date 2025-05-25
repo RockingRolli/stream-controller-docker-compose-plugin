@@ -161,7 +161,9 @@ class ToggleServices(ActionBase):
         self.update_label_and_icon()
 
     def on_tick(self):
-        self.update_label_and_icon()
+        # Only update if not in STARTING or STOPPING state
+        if self.compose_status not in (ServiceStatus.STARTING, ServiceStatus.STOPPING):
+            self.update_label_and_icon()
 
     def on_key_down(self) -> None:
         if self.compose_status == ServiceStatus.RUNNING:
