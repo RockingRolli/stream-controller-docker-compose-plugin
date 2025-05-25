@@ -58,6 +58,9 @@ class ToggleServices(ActionBase):
     @property
     def compose_status(self) -> ServiceStatus:
         """Get the status of the compose file."""
+        if not self.compose_file_name:
+            return ServiceStatus.STOPPED
+
         return dc.get_status(self.compose_file_name, self.selected_services)
 
     @property
