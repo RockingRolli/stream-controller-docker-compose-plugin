@@ -1,14 +1,17 @@
 # Import StreamController modules
+import os
 
+import gi
 from src.backend.DeckManagement.InputIdentifier import Input
 from src.backend.PluginManager.ActionHolder import ActionHolder
 from src.backend.PluginManager.ActionInputSupport import ActionInputSupport
 from src.backend.PluginManager.PluginBase import PluginBase
 
-# Import actions
 from .ToggleServices import ToggleServices
 
-print("Loading Docker Compose Plugin...")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gtk
 
 
 class PluginTemplate(PluginBase):
@@ -21,6 +24,9 @@ class PluginTemplate(PluginBase):
             action_base=ToggleServices,
             action_id="docker-compose::ToggleServices",
             action_name="Toggle Services",
+            icon=Gtk.Picture.new_for_filename(
+                os.path.join(self.PATH, "assets", "switch-vertical.svg")
+            ),
             action_support={
                 Input.Key: ActionInputSupport.SUPPORTED,
             },
