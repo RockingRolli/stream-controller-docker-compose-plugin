@@ -83,6 +83,7 @@ class ToggleServices(ActionBase):
         self.service_selection_row.set_service_names(
             dc.get_services(Path(compose_file_name))
         )
+        self.update_label_and_icon()
 
     @property
     def selected_services(self) -> list:
