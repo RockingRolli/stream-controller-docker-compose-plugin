@@ -87,7 +87,8 @@ def get_services(compose_file: Path) -> list[str]:
         result = _run_compose(compose_file, "config", "--services")
         if result is None:
             return []
-        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        services = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        return sorted(services)
     except Exception as e:
         print(f"Error retrieving services: {e}")
         return []

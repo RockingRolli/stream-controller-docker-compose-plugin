@@ -124,12 +124,12 @@ class ToggleServices(ActionBase):
             """Callback to update the selected services when the selection changes."""
             self.selected_services = service_names
 
-        self.test_row = ServicesSelection(services_selection_changed)
-        self.test_row.set_service_names(services, self.selected_services)
+        self.service_selection_row = ServicesSelection(services_selection_changed)
+        self.service_selection_row.set_service_names(services, self.selected_services)
 
         return [
             self.compose_file_row,
-            self.test_row,
+            self.service_selection_row,
         ]
 
     def update_label_and_icon(self):
