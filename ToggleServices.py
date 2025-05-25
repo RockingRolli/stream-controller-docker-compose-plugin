@@ -50,6 +50,7 @@ class ToggleServices(ActionBase):
             state=state,
             input_ident=input_ident,
         )
+        self.in_transition = False
 
     def set_image(self, image_name: str):
         asset_path = Path(self.plugin_base.PATH) / "assets" / image_name
@@ -165,11 +166,13 @@ class ToggleServices(ActionBase):
 
     def on_tick(self):
         # Only update if not in STARTING or STOPPING state
-        if self.compose_status not in (ServiceStatus.STARTING, ServiceStatus.STOPPING):
+        if not self.in_transition:
             self.update_label_and_icon()
 
     def on_key_down(self) -> None:
+        self.in_transition = True
         if self.compose_status == ServiceStatus.RUNNING:
+
             self.update_status(ServiceStatus.STOPPING)
             time.sleep(0.5)
             if not dc.stop(self.compose_file_name, self.selected_services):
@@ -182,6 +185,8 @@ class ToggleServices(ActionBase):
                 self.set_label("Error starting")
                 return
 
+        # After starting or stopping, update the status
+        self.in_transition = False
         self.update_label_and_icon()
 
     def on_key_up(self) -> None:
