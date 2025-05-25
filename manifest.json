@@ -1,9 +1,8 @@
 {
-    "version": "0.0.1",
+    "version": "",
     "thumbnail": "",
     "id": "humble-retreat_docker-compose-plugin",
     "name": "Docker Compose",
-    "app-version": "1.5.0",
     "author": "Roland von Ohlen",
     "github": "https://github.com/RockingRolli/stream-controller-docker-compose-plugin",
     "descriptions": {
@@ -13,5 +12,5 @@
         "en_US": "Manage docker compose services."
     },
     "tags": ["docker compose","docker"],
-    "minimum-app-version": ""
+    "minimum-app-version": "1.0.0"
 }
